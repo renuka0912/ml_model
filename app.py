@@ -1,19 +1,12 @@
 import streamlit as st
 import pickle
 import numpy as np
-import os
-
-# Get the absolute path of the current script
-current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Load the trained model and scaler
-model_path = os.path.join(current_dir, "model.pkl")
-scaler_path = os.path.join(current_dir, "scaler.pkl")
-
-with open(model_path, "rb") as model_file:
+with open("model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
 
-with open(scaler_path, "rb") as scaler_file:
+with open("scaler.pkl", "rb") as scaler_file:
     scaler = pickle.load(scaler_file)
 
 # Title
@@ -33,13 +26,14 @@ Sex = 1 if Sex == "Male" else 0
 Embarked_dict = {"C": 0, "Q": 1, "S": 2}
 Embarked = Embarked_dict[Embarked]
 
+# Ensure correct number of features (modify this if more columns exist)
+features = np.array([[Pclass, Sex, Age, SibSp, Parch, Fare, Embarked]])
+
+# Transform input
+features_scaled = scaler.transform(features)
+
 # Prediction button
 if st.button("Predict"):
-    # Prepare input data
-    features = np.array([[Pclass, Sex, Age, SibSp, Parch, Fare, Embarked]])
-    features = scaler.transform(features)
-    prediction = model.predict(features)[0]
-
-    # Display result
+    prediction = model.predict(features_scaled)[0]
     result = "Survived" if prediction == 1 else "Not Survived"
     st.success(f"Prediction: {result}")
